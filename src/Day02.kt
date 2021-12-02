@@ -23,7 +23,7 @@ fun main() {
         }
     }
 
-    fun List<Command>.play(): RouteDestination {
+    fun List<Command>.playBasicRoute(): RouteDestination {
         var sumHor = 0
         var sumDepth = 0
         forEach { command ->
@@ -46,20 +46,48 @@ fun main() {
         )
     }
 
+    fun List<Command>.playAdvancedRoute(): RouteDestination {
+        var sumHor = 0
+        var sumDepth = 0
+        var sumAim = 0
+        forEach { command ->
+            when (command.type) {
+                CommandType.forward -> {
+                    sumHor += command.length
+                    sumDepth += command.length * sumAim
+                }
+                CommandType.down -> {
+                    sumAim += command.length
+                }
+                CommandType.up -> {
+                    sumAim -= command.length
+                }
+            }
+        }
+        return RouteDestination(
+            horizontal = sumHor,
+            depth = sumDepth
+        )
+    }
+
     fun part1(input: List<String>): Int = input
         .mapNotNull { rawCommand ->
             rawCommand.extractCommand()
         }
-        .play()
+        .playBasicRoute()
         .let { routeDestination -> routeDestination.depth * routeDestination.horizontal }
 
-    fun part2(input: List<String>): Int {
-        return 0
-    }
+    fun part2(input: List<String>): Int = input
+        .mapNotNull { rawCommand ->
+            rawCommand.extractCommand()
+        }
+        .playAdvancedRoute()
+        .let { routeDestination -> routeDestination.depth * routeDestination.horizontal }
 
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day02_test")
     check(part1(testInput) == 150)
+    check(part2(testInput) == 900)
 
     val input = readInput("Day02")
     println(part1(input))
